@@ -1000,17 +1000,15 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
         const [fx, fy] = polar(ORBIT_RADII[Math.max(0, ring - 1)], ring > 0 ? feederAngle : aTeam);
         ringNodes.push(
           <g
-            key={`${id}-${s}-${code ?? "tbd"}`}
+            key={`${id}-${s}`}
+            transform={`translate(${x} ${y})`}
             className={[
               "rnode",
-              ring > 0 && code ? "slot-pop" : "",
               isLoserDone ? "dim" : "",
               onpath ? "onpath" : "",
               favorite === code && code ? "favnode" : "",
               (isPredictedEntry || (!played && predictions[m.id] === code && code)) ? "predicted" : "",
             ].join(" ")}
-            style={ring > 0 && code ? { "--dx": `${fx - x}px`, "--dy": `${fy - y}px` } : undefined}
-            transform={`translate(${x} ${y})`}
             onClick={() => code && onTeamClick(m, code)}
             onMouseEnter={() => code && setTip({
               x, y,
@@ -1019,10 +1017,16 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
             })}
             onMouseLeave={() => setTip(null)}
           >
-            <circle className="bg" r={ORBIT_BADGE[ring]} fill="#0d1424" stroke={code ? "rgba(148,163,255,.35)" : "rgba(148,163,255,.15)"} strokeWidth="1.5" strokeDasharray={code ? "0" : "4 4"} />
-            {code
-              ? <text textAnchor="middle" dominantBaseline="central" fontSize={ORBIT_BADGE[ring] * 1.25}>{flagOf(code)}</text>
-              : <text textAnchor="middle" dominantBaseline="central" fontSize="11" fill="#5c6685" fontWeight="700">?</text>}
+            <g
+              key={code ?? "tbd"}
+              className={ring > 0 && code ? "slot-pop" : undefined}
+              style={ring > 0 && code ? { "--dx": `${fx - x}px`, "--dy": `${fy - y}px` } : undefined}
+            >
+              <circle className="bg" r={ORBIT_BADGE[ring]} fill="#0d1424" stroke={code ? "rgba(148,163,255,.35)" : "rgba(148,163,255,.15)"} strokeWidth="1.5" strokeDasharray={code ? "0" : "4 4"} />
+              {code
+                ? <text textAnchor="middle" dominantBaseline="central" fontSize={ORBIT_BADGE[ring] * 1.25}>{flagOf(code)}</text>
+                : <text textAnchor="middle" dominantBaseline="central" fontSize="11" fill="#5c6685" fontWeight="700">?</text>}
+            </g>
           </g>
         );
       });
@@ -1325,7 +1329,7 @@ function StatsPanel() {
 /* ============================ app ============================ */
 
 export default function App() {
-  const [view, setView] = useState("bracket"); // groups | bracket | stats
+  const [view, setView] = useState("groups"); // groups | bracket | stats
   const [favorite, setFavoriteState] = useState(() => localStorage.getItem("wc26-fav") || null);
   const [predictions, setPredictionsState] = useState(() => {
     try { return JSON.parse(localStorage.getItem("wc26-predictions")) || {}; } catch { return {}; }
