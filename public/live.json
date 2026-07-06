@@ -20,7 +20,7 @@
     "m88": { "hs": 1, "as": 0, "winner": "COL" },
     "r16a": { "hs": 0, "as": 3, "winner": "MAR" },
     "r16b": { "hs": 0, "as": 1, "winner": "FRA" },
-    "r16c": { "hs": 0, "as": 2, "winner": "NOR" },
+    "r16c": { "hs": 1, "as": 2, "winner": "NOR" },
     "r16d": { "hs": 2, "as": 3, "winner": "ENG" }
   },
   "scorers": [

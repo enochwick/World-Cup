@@ -262,31 +262,134 @@ const LIVE_DEFAULTS = {
   notes: MATCH_NOTES,
 };
 
+/* ---- ESPN public scoreboard: primary source for scores/fixtures ---- */
+const ESPN_URL =
+  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260719";
+
+function parseEspnEvents(json) {
+  const events = [];
+  for (const ev of json?.events ?? []) {
+    const c = ev.competitions?.[0];
+    const h = c?.competitors?.find((x) => x.homeAway === "home");
+    const a = c?.competitors?.find((x) => x.homeAway === "away");
+    if (!h || !a) continue;
+    const codeOf = (x) =>
+      TEAMS[x.team?.abbreviation]
+        ? x.team.abbreviation
+        : Object.keys(TEAMS).find((k) => TEAMS[k].name === x.team?.displayName) ?? null;
+    const hc = codeOf(h), ac = codeOf(a);
+    if (!hc || !ac) continue;
+    const st = ev.status?.type ?? {};
+    const pens =
+      h.shootoutScore != null && a.shootoutScore != null
+        ? `${h.shootoutScore}–${a.shootoutScore}`
+        : null;
+    // ESPN dates come as "2026-07-06T19:00Z" — add seconds for safe parsing
+    const kickoff = ev.date ? ev.date.replace(/T(\d\d:\d\d)Z$/, "T$1:00Z") : null;
+    events.push({
+      hc, ac,
+      hs: Number(h.score) || 0, as: Number(a.score) || 0,
+      state: st.state, // pre | in | post
+      pens,
+      aet: st.detail === "AET",
+      clock: ev.status?.displayClock,
+      detail: st.shortDetail ?? st.detail,
+      winner:
+        st.state === "post"
+          ? h.winner ? hc : a.winner ? ac
+            : pens ? (h.shootoutScore > a.shootoutScore ? hc : ac) : null
+          : null,
+      kickoff,
+      venue: c?.venue?.fullName
+        ? `${c.venue.fullName}${c.venue.address?.city ? ", " + String(c.venue.address.city).split(",")[0] : ""}`
+        : null,
+    });
+  }
+  return events;
+}
+
+/* Match ESPN events to bracket slots by team pair. Multiple passes so that
+   once early-round results land, later rounds' participants resolve and
+   their events can be matched too. */
+function applyEspnResults(events, baseResults) {
+  const results = { ...baseResults };
+  const used = new Set();
+  for (let pass = 0; pass < 4 && used.size < events.length; pass++) {
+    const byId = {};
+    ALL_KO.forEach((m) => (byId[m.id] = { ...m, ...(results[m.id] || {}) }));
+    const resolved = resolveBracket(byId, {});
+    for (const ev of events) {
+      if (used.has(ev)) continue;
+      const match = ALL_KO.find((m) => {
+        const r = resolved[m.id];
+        return r.home && r.away &&
+          ((r.home === ev.hc && r.away === ev.ac) || (r.home === ev.ac && r.away === ev.hc));
+      });
+      if (!match) continue;
+      used.add(ev);
+      const flip = resolved[match.id].home === ev.ac;
+      const entry = { tbc: false, timeTBC: false };
+      if (ev.kickoff) entry.kickoff = ev.kickoff;
+      if (ev.venue) entry.venue = ev.venue;
+      if (ev.state !== "pre") {
+        entry.hs = flip ? ev.as : ev.hs;
+        entry.as = flip ? ev.hs : ev.as;
+        if (ev.pens) entry.pens = flip ? ev.pens.split("–").reverse().join("–") : ev.pens;
+        if (ev.aet) entry.aet = true;
+        if (ev.winner) entry.winner = ev.winner;
+        if (ev.state === "in") entry.live = { clock: ev.clock, detail: ev.detail };
+      }
+      const next = { ...(results[match.id] || {}), ...entry };
+      if (ev.state !== "in") delete next.live;
+      results[match.id] = next;
+    }
+  }
+  return results;
+}
+
 function useLiveData() {
   const [live, setLive] = useState(LIVE_DEFAULTS);
   const [lastSync, setLastSync] = useState(null);
+  const [source, setSource] = useState("connecting"); // connecting | espn | local
   const prevRef = useRef("");
   useEffect(() => {
     let stopped = false;
     const tick = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.BASE_URL}live.json?t=${Date.now()}`, { cache: "no-store" });
-        if (!res.ok || stopped) return;
-        const text = await res.text();
-        if (stopped) return;
+      const [jsonRes, espnRes] = await Promise.allSettled([
+        fetch(`${import.meta.env.BASE_URL}live.json?t=${Date.now()}`, { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : Promise.reject())),
+        fetch(ESPN_URL).then((r) => (r.ok ? r.json() : Promise.reject())),
+      ]);
+      if (stopped) return;
+      const base = jsonRes.status === "fulfilled" ? jsonRes.value : {};
+      const next = { ...LIVE_DEFAULTS, ...base, notes: { ...MATCH_NOTES, ...(base.notes || {}) } };
+      let src = "local";
+      if (espnRes.status === "fulfilled") {
+        try {
+          const events = parseEspnEvents(espnRes.value);
+          if (events.length) {
+            next.results = applyEspnResults(events, next.results);
+            src = "espn";
+            const stageName = espnRes.value?.leagues?.[0]?.season?.type?.name;
+            if (stageName) next.stage = `${stageName} · knockout stage in progress`;
+          }
+        } catch { /* fall back to local results */ }
+      }
+      if (jsonRes.status === "fulfilled" || espnRes.status === "fulfilled") {
         setLastSync(new Date());
+        setSource(src);
+        const text = JSON.stringify(next);
         if (text !== prevRef.current) {
           prevRef.current = text;
-          const data = JSON.parse(text);
-          setLive({ ...LIVE_DEFAULTS, ...data, notes: { ...MATCH_NOTES, ...(data.notes || {}) } });
+          setLive(next);
         }
-      } catch { /* keep last good data */ }
+      }
     };
     tick();
     const id = setInterval(tick, 5000);
     return () => { stopped = true; clearInterval(id); };
   }, []);
-  return { live, lastSync };
+  return { live, lastSync, source };
 }
 
 const TourCtx = createContext(null);
@@ -452,6 +555,17 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .sync-pill svg { color: var(--accent); }
 .spin-slow { animation: spinSlow 5s linear infinite; }
 @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+/* ---------- live match states ---------- */
+.live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: pulse 1.1s ease-in-out infinite; }
+.live-tag { display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; color: var(--red); font-weight: 800; font-size: 10.5px; letter-spacing: .06em; }
+.countdown.islive { border-color: rgba(255,75,92,.45); box-shadow: 0 0 24px rgba(255,75,92,.12); }
+.countdown.islive .cd-label { color: var(--red); font-weight: 800; }
+.cd-live-score { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 0 6px; font-weight: 700; font-size: 15px; }
+.cd-live-score b { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); }
+.cd-live-clock { text-align: center; color: var(--red); font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rnode.livenode circle.bg { stroke: var(--red); stroke-width: 2.5; animation: liveRing 1.4s ease-in-out infinite; }
+@keyframes liveRing { 0%,100% { filter: drop-shadow(0 0 2px rgba(255,75,92,.4)); } 50% { filter: drop-shadow(0 0 9px rgba(255,75,92,.9)); } }
 @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: .4; transform: scale(.75);} }
 
 .countdown { min-width: 280px; background: rgba(7,11,20,.55); border: 1px solid var(--line2); border-radius: var(--radius); padding: 16px 18px; backdrop-filter: blur(6px); }
@@ -726,12 +840,28 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 
 /* ============================ components ============================ */
 
-function Countdown({ target, home, away, round }) {
+function Countdown({ match, round }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+  if (!match) return null;
+  const { kickoff: target, home, away } = match;
+  if (match.live) {
+    return (
+      <div className="countdown islive">
+        <div className="cd-label"><span className="live-dot" /> Live now · {round}</div>
+        <div className="cd-live-score">
+          <span>{flagOf(home)} {nameOf(home)}</span>
+          <b>{match.hs}–{match.as}</b>
+          <span>{nameOf(away)} {flagOf(away)}</span>
+        </div>
+        <div className="cd-live-clock">{match.live.clock}{match.live.detail ? ` · ${match.live.detail}` : ""}</div>
+        {match.venue && <div style={{ marginTop: 8, fontSize: 12, color: "var(--muted)" }}><MapPin size={11} style={{ verticalAlign: -1 }} /> {match.venue}</div>}
+      </div>
+    );
+  }
   if (!target) return null;
   const ms = Math.max(0, new Date(target).getTime() - now);
   const d = Math.floor(ms / 86400000);
@@ -1059,11 +1189,13 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
           />
         );
         // badge
-        const sub = played
-          ? `${nameOf(m.home)} ${m.hs}–${m.as} ${nameOf(m.away)}${m.pens ? ` (${m.pens} pens)` : m.aet ? " (aet)" : ""}`
-          : m.home && m.away
-            ? `${fmtLocal(m.kickoff)}${m.venue ? " · " + m.venue.split(",")[0] : ""}`
-            : "Awaiting qualifiers";
+        const sub = m.live
+          ? `LIVE ${m.live.clock} — ${nameOf(m.home)} ${m.hs}–${m.as} ${nameOf(m.away)}`
+          : played
+            ? `${nameOf(m.home)} ${m.hs}–${m.as} ${nameOf(m.away)}${m.pens ? ` (${m.pens} pens)` : m.aet ? " (aet)" : ""}`
+            : m.home && m.away
+              ? `${fmtLocal(m.kickoff)}${m.venue ? " · " + m.venue.split(",")[0] : ""}`
+              : "Awaiting qualifiers";
         // slide-in offset: badges pop inward from their feeder's direction
         const feederAngle = ring > 0 ? slotAngle(ring - 1, 2 * k + s, 0.5) : aTeam;
         const [fx, fy] = polar(ORBIT_RADII[Math.max(0, ring - 1)], ring > 0 ? feederAngle : aTeam);
@@ -1073,6 +1205,7 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
             transform={`translate(${x} ${y})`}
             className={[
               "rnode",
+              m.live ? "livenode" : "",
               isLoserDone ? "dim" : "",
               onpath ? "onpath" : "",
               favorite === code && code ? "favnode" : "",
@@ -1202,7 +1335,7 @@ function ClassicGrid({ bracket, predictions, favorite, selected, mode, clickTeam
                       {favorite === code && code && <Star size={10} fill="currentColor" />}
                       {isPredictedEntry && <span className="pred-tag">PICK</span>}
                       {!played && !isPredictedEntry && predictions[m.id] === code && code && <span className="pred-tag">PICK</span>}
-                      {played && <span className="bscore">{score}</span>}
+                      {(played || rm.live) && <span className="bscore">{score}</span>}
                     </button>
                   );
                   return (
@@ -1212,7 +1345,8 @@ function ClassicGrid({ bracket, predictions, favorite, selected, mode, clickTeam
                       {rm.pens && <div className="pens-note">Pens {rm.pens} — {nameOf(rm.winner)} advance</div>}
                       {rm.aet && !rm.pens && rm.winner && <div className="pens-note">After extra time</div>}
                       <div className="bmeta">
-                        {!played && rm.kickoff && <><Clock size={9} />{fmtLocal(rm.kickoff)}{rm.timeTBC && " ※"}</>}
+                        {rm.live && <span className="live-tag"><span className="live-dot" /> LIVE {rm.live.clock}</span>}
+                        {!played && !rm.live && rm.kickoff && <><Clock size={9} />{fmtLocal(rm.kickoff)}{rm.timeTBC && " ※"}</>}
                         {rm.venue && <><MapPin size={9} />{rm.venue.split(",")[0]}{rm.tbc && " ※"}</>}
                       </div>
                     </div>
@@ -1422,7 +1556,7 @@ export default function App() {
     });
   }, []);
 
-  const { live, lastSync } = useLiveData();
+  const { live, lastSync, source } = useLiveData();
   const tour = useMemo(() => buildTournament(live), [live]);
   const bracket = useBracket(tour.byId, predictions);
 
@@ -1435,7 +1569,10 @@ export default function App() {
       .slice(0, 8);
   }, [tour, bracket]);
 
-  const nextMatch = upcoming.find((m) => m.home && m.away && new Date(m.kickoff) > new Date()) || upcoming[0];
+  const nextMatch =
+    upcoming.find((m) => m.live) ||
+    upcoming.find((m) => m.home && m.away && new Date(m.kickoff) > new Date()) ||
+    upcoming[0];
 
   const roundLabelOf = (id) => ROUNDS.find((r) => r.matches.some((m) => m.id === id))?.label;
 
@@ -1464,18 +1601,14 @@ export default function App() {
             <div className="sync-pill">
               <RefreshCw size={11} className={lastSync ? "spin-slow" : ""} />
               {lastSync
-                ? <>Live · refreshes every 5s · updated {lastSync.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}</>
+                ? <>
+                    {source === "espn" ? "ESPN live feed" : "Local data (ESPN unreachable)"} · refreshes every 5s ·
+                    updated {lastSync.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}
+                  </>
                 : "Connecting to live data…"}
             </div>
           </div>
-          {nextMatch && (
-            <Countdown
-              target={nextMatch.kickoff}
-              home={nextMatch.home}
-              away={nextMatch.away}
-              round={roundLabelOf(nextMatch.id)}
-            />
-          )}
+          {nextMatch && <Countdown match={nextMatch} round={roundLabelOf(nextMatch.id)} />}
         </div>
         <div className="hero-scorers">
           <h3><Flame size={14} /> Golden Boot race</h3>
@@ -1497,18 +1630,24 @@ export default function App() {
       <div className="strip">
         {upcoming.map((m, i) => (
           <div className="fix-card stagger" style={{ animationDelay: `${0.1 + i * 0.07}s` }} key={m.id}>
-            <div className="fix-round">{roundLabelOf(m.id)}</div>
+            <div className="fix-round">
+              {roundLabelOf(m.id)}
+              {m.live && <span className="live-tag"><span className="live-dot" /> LIVE {m.live.clock}</span>}
+            </div>
             <div className="fix-teams">
               {[m.home, m.away].map((c, i) => (
                 <div className={`fix-team ${favorite === c ? "fav" : ""}`} key={i}>
                   <span>{c ? flagOf(c) : "·"}</span>
                   <span>{c ? nameOf(c) : "Winner TBD"}</span>
                   {(i === 0 ? m.homePredicted : m.awayPredicted) && <span className="pred-tag">PICK</span>}
+                  {m.live && <b style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>{i === 0 ? m.hs : m.as}</b>}
                 </div>
               ))}
             </div>
             <div className="fix-meta">
-              <span><Clock size={12} /> {fmtLocal(m.kickoff)}{m.timeTBC && " ※ TBC"}</span>
+              {m.live
+                ? <span><Zap size={12} /> {m.live.detail ?? "In play"}</span>
+                : <span><Clock size={12} /> {fmtLocal(m.kickoff)}{m.timeTBC && " ※ TBC"}</span>}
               {m.venue && <span><MapPin size={12} /> {m.venue}</span>}
             </div>
             {m.home && m.away && (
@@ -1554,9 +1693,9 @@ export default function App() {
       {preview && <PreviewModal match={preview} onClose={() => setPreview(null)} />}
 
       <footer className="foot">
-        Results and stats stream from <code>live.json</code> (auto-refreshed every 5 seconds), last compiled {live.asOf} from
-        NBC Sports, CBS Sports, FOX Sports, Sky Sports, ESPN and FIFA.com coverage. Items marked ※ could not be fully
-        verified across sources. This is a fan dashboard — not affiliated with FIFA.
+        Scores, fixtures and live match states stream from ESPN's public scoreboard API every 5 seconds, with
+        <code> live.json</code> (last compiled {live.asOf}) as fallback and as the source for scorer/stat tables.
+        Items marked ※ could not be fully verified. This is a fan dashboard — not affiliated with FIFA or ESPN.
       </footer>
     </div>
     </TourCtx.Provider>
