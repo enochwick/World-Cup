@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef, createContext, useContext } from "react";
 import {
   Trophy, Clock, MapPin, Star, X, ChevronRight, Flame, Shield,
   Target, Users, TrendingUp, Calendar, Zap, Info, Eye, MousePointerClick,
-  CircleDot, AlertTriangle,
+  CircleDot, AlertTriangle, RefreshCw,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, Cell,
@@ -246,6 +246,52 @@ const STATUS_META = {
   OUT: { label: "Eliminated", cls: "st-out" },
 };
 
+/* ============================ live data ============================ */
+/* All results/stats live in public/live.json — the app polls it every 5s
+   and hot-swaps state whenever the file changes. The constants above are
+   the fallback snapshot if the fetch fails. */
+
+const LIVE_DEFAULTS = {
+  asOf: DATA_AS_OF,
+  stage: "Round of 32 · knockout stage in progress",
+  results: {},
+  scorers: SCORERS,
+  scorersNote: "Ties are ordered by assists per FIFA's Golden Boot rules.",
+  assists: ASSISTS,
+  cleanSheets: CLEAN_SHEETS,
+  notes: MATCH_NOTES,
+};
+
+function useLiveData() {
+  const [live, setLive] = useState(LIVE_DEFAULTS);
+  const [lastSync, setLastSync] = useState(null);
+  const prevRef = useRef("");
+  useEffect(() => {
+    let stopped = false;
+    const tick = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}live.json?t=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok || stopped) return;
+        const text = await res.text();
+        if (stopped) return;
+        setLastSync(new Date());
+        if (text !== prevRef.current) {
+          prevRef.current = text;
+          const data = JSON.parse(text);
+          setLive({ ...LIVE_DEFAULTS, ...data, notes: { ...MATCH_NOTES, ...(data.notes || {}) } });
+        }
+      } catch { /* keep last good data */ }
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => { stopped = true; clearInterval(id); };
+  }, []);
+  return { live, lastSync };
+}
+
+const TourCtx = createContext(null);
+const useTour = () => useContext(TourCtx);
+
 /* ============================ helpers ============================ */
 
 const flagOf = (c) => TEAMS[c]?.flag ?? "🏳️";
@@ -263,60 +309,75 @@ function fmtTime(iso) {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-// Teams knocked out of the tournament so far (groups or R32).
-const KO_LOSERS = new Set(
-  R32.filter((m) => m.winner).map((m) => (m.winner === m.home ? m.away : m.home))
-);
-function teamAlive(code) {
-  const row = GROUPS.flatMap((g) => g.rows).find((r) => r.t === code);
-  if (!row || row.st === "OUT") return false;
-  return !KO_LOSERS.has(code);
-}
 function groupOf(code) {
   return GROUPS.find((g) => g.rows.some((r) => r.t === code));
-}
-function knockoutResults(code) {
-  return R32.filter((m) => m.winner && (m.home === code || m.away === code)).map((m) => {
-    const won = m.winner === code;
-    const opp = m.home === code ? m.away : m.home;
-    const score = m.home === code ? `${m.hs}–${m.as}` : `${m.as}–${m.hs}`;
-    return { opp, score, won, pens: m.pens };
-  });
 }
 
 /* ============================ bracket engine ============================ */
 /* Resolves each match's participants using real results first, then the
    user's predictions for anything undecided. */
-function useBracket(predictions) {
-  return useMemo(() => {
-    const byId = {};
-    ALL_KO.forEach((m) => (byId[m.id] = m));
-    const resolved = {};
+function resolveBracket(byId, predictions) {
+  const resolved = {};
+  const winnerOf = (id) => {
+    const r = resolve(id);
+    if (r.winner) return { code: r.winner, real: true };
+    if (predictions[id] && (predictions[id] === r.home || predictions[id] === r.away))
+      return { code: predictions[id], real: false };
+    return null;
+  };
+  const resolve = (id) => {
+    if (resolved[id]) return resolved[id];
+    const m = byId[id];
+    let home = m.home ?? null, away = m.away ?? null;
+    let homePredicted = false, awayPredicted = false;
+    if (m.feeds) {
+      const w0 = winnerOf(m.feeds[0]);
+      const w1 = winnerOf(m.feeds[1]);
+      home = w0?.code ?? null; homePredicted = w0 ? !w0.real : false;
+      away = w1?.code ?? null; awayPredicted = w1 ? !w1.real : false;
+    }
+    resolved[id] = { ...m, home, away, homePredicted, awayPredicted };
+    return resolved[id];
+  };
+  ALL_KO.forEach((m) => resolve(m.id));
+  return resolved;
+}
 
-    const winnerOf = (id) => {
-      const r = resolve(id);
-      if (r.winner) return { code: r.winner, real: true };
-      if (predictions[id] && (predictions[id] === r.home || predictions[id] === r.away))
-        return { code: predictions[id], real: false };
-      return null;
-    };
-    const resolve = (id) => {
-      if (resolved[id]) return resolved[id];
-      const m = byId[id];
-      let home = m.home ?? null, away = m.away ?? null;
-      let homePredicted = false, awayPredicted = false;
-      if (m.feeds) {
-        const w0 = winnerOf(m.feeds[0]);
-        const w1 = winnerOf(m.feeds[1]);
-        home = w0?.code ?? null; homePredicted = w0 ? !w0.real : false;
-        away = w1?.code ?? null; awayPredicted = w1 ? !w1.real : false;
-      }
-      resolved[id] = { ...m, home, away, homePredicted, awayPredicted };
-      return resolved[id];
-    };
-    ALL_KO.forEach((m) => resolve(m.id));
-    return resolved;
-  }, [predictions]);
+function useBracket(byId, predictions) {
+  return useMemo(() => resolveBracket(byId, predictions), [byId, predictions]);
+}
+
+/* Everything derived from the current live results, shared via context. */
+function buildTournament(live) {
+  const merged = ALL_KO.map((m) => ({ ...m, ...(live.results[m.id] || {}) }));
+  const byId = {};
+  merged.forEach((m) => (byId[m.id] = m));
+  const real = resolveBracket(byId, {}); // no predictions: real state only
+  const koLosers = new Set();
+  merged.forEach((m) => {
+    const r = real[m.id];
+    if (r.winner) {
+      const loser = r.winner === r.home ? r.away : r.home;
+      if (loser) koLosers.add(loser);
+    }
+  });
+  const teamAlive = (code) => {
+    const row = GROUPS.flatMap((g) => g.rows).find((r) => r.t === code);
+    if (!row || row.st === "OUT") return false;
+    return !koLosers.has(code);
+  };
+  const knockoutResults = (code) =>
+    merged
+      .filter((m) => real[m.id].winner && (real[m.id].home === code || real[m.id].away === code))
+      .map((m) => {
+        const r = real[m.id];
+        const won = r.winner === code;
+        const opp = r.home === code ? r.away : r.home;
+        const score = r.home === code ? `${r.hs}–${r.as}` : `${r.as}–${r.hs}`;
+        const round = ROUNDS.find((x) => x.matches.some((mm) => mm.id === m.id));
+        return { opp, score, won, pens: r.pens, aet: r.aet, round: round?.key ?? "" };
+      });
+  return { live, merged, byId, real, teamAlive, knockoutResults };
 }
 
 // The chain of match ids a team would pass through to reach the final.
@@ -387,6 +448,10 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
   background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(45,227,138,.35);
 }
 .stage-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.8s ease-in-out infinite; }
+.sync-pill { display: flex; align-items: center; gap: 7px; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
+.sync-pill svg { color: var(--accent); }
+.spin-slow { animation: spinSlow 5s linear infinite; }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
 @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: .4; transform: scale(.75);} }
 
 .countdown { min-width: 280px; background: rgba(7,11,20,.55); border: 1px solid var(--line2); border-radius: var(--radius); padding: 16px 18px; backdrop-filter: blur(6px); }
@@ -708,9 +773,10 @@ function Wdl({ w, d, l }) {
 }
 
 function PreviewModal({ match, onClose }) {
+  const { live, knockoutResults } = useTour();
   const { home, away } = match;
   const roundLabel = ROUNDS.find((r) => r.matches.some((m) => m.id === match.id))?.label;
-  const note = MATCH_NOTES[match.id];
+  const note = live.notes[match.id];
   const sideInfo = (code) => {
     const g = groupOf(code);
     const row = g?.rows.find((r) => r.t === code);
@@ -746,7 +812,7 @@ function PreviewModal({ match, onClose }) {
                   )}
                   {S.ko.map((r, i) => (
                     <li key={i}>
-                      R32 vs {flagOf(r.opp)} {nameOf(r.opp)}: <b>{r.score}{r.pens ? ` (${r.pens} pens)` : ""}</b>{" "}
+                      {r.round} vs {flagOf(r.opp)} {nameOf(r.opp)}: <b>{r.score}{r.pens ? ` (${r.pens} pens)` : r.aet ? " (aet)" : ""}</b>{" "}
                       <span style={{ color: r.won ? "var(--accent)" : "var(--red)", fontWeight: 800 }}>{r.won ? "W" : "L"}</span>
                     </li>
                   ))}
@@ -755,7 +821,7 @@ function PreviewModal({ match, onClose }) {
               </div>
             ))}
           </div>
-          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Group records are aggregate W-D-L (match order not shown). Data as of {DATA_AS_OF}.</div>
+          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Group records are aggregate W-D-L (match order not shown). Data as of {live.asOf}.</div>
         </div>
       </div>
     </>
@@ -763,6 +829,7 @@ function PreviewModal({ match, onClose }) {
 }
 
 function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
+  const { teamAlive, knockoutResults } = useTour();
   const g = groupOf(code);
   const row = g?.rows.find((r) => r.t === code);
   const ko = knockoutResults(code);
@@ -782,7 +849,7 @@ function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
             ? <span className="chip g">Still alive</span>
             : row?.st === "OUT"
               ? <span className="chip r">Out in groups</span>
-              : <span className="chip r">Out in Round of 32</span>}
+              : <span className="chip r">Out — {ko.find((r) => !r.won)?.round === "R16" ? "Round of 16" : "Round of 32"}</span>}
         </div>
         <button className={`favbtn ${favorite === code ? "on" : ""}`} onClick={() => setFavorite(favorite === code ? null : code)}>
           <Star size={14} fill={favorite === code ? "currentColor" : "none"} />
@@ -805,8 +872,8 @@ function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
             <h4><Zap size={13} /> Knockout results</h4>
             {ko.map((r, i) => (
               <div className="pitem" key={i}>
-                <span>R32 · vs {flagOf(r.opp)} {nameOf(r.opp)}</span>
-                <b>{r.score}{r.pens ? ` (${r.pens}p)` : ""}</b>
+                <span>{r.round} · vs {flagOf(r.opp)} {nameOf(r.opp)}</span>
+                <b>{r.score}{r.pens ? ` (${r.pens}p)` : r.aet ? " (aet)" : ""}</b>
                 <span className={r.won ? "res-w" : "res-l"}>{r.won ? "W" : "L"}</span>
               </div>
             ))}
@@ -852,6 +919,7 @@ function TeamPanel({ code, onClose, favorite, setFavorite, bracket }) {
 }
 
 function GroupsView({ onTeam, favorite }) {
+  const { teamAlive } = useTour();
   return (
     <>
       <div className="groups-grid">
@@ -945,6 +1013,7 @@ const slotAngle = (ring, k, s) => {
 };
 
 function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }) {
+  const { teamAlive } = useTour();
   const [tip, setTip] = useState(null);
   const highlight = useMemo(
     () => (selected ? new Set(pathToFinal(selected, bracket)) : new Set()),
@@ -991,7 +1060,7 @@ function RadialBracket({ bracket, predictions, favorite, selected, onTeamClick }
         );
         // badge
         const sub = played
-          ? `${nameOf(m.home)} ${m.hs}–${m.as} ${nameOf(m.away)}${m.pens ? ` (${m.pens} pens)` : ""}`
+          ? `${nameOf(m.home)} ${m.hs}–${m.as} ${nameOf(m.away)}${m.pens ? ` (${m.pens} pens)` : m.aet ? " (aet)" : ""}`
           : m.home && m.away
             ? `${fmtLocal(m.kickoff)}${m.venue ? " · " + m.venue.split(",")[0] : ""}`
             : "Awaiting qualifiers";
@@ -1141,6 +1210,7 @@ function ClassicGrid({ bracket, predictions, favorite, selected, mode, clickTeam
                       {renderTeam(rm.home, rm.hs, rm.winner === rm.home, rm.homePredicted)}
                       {renderTeam(rm.away, rm.as, rm.winner === rm.away, rm.awayPredicted)}
                       {rm.pens && <div className="pens-note">Pens {rm.pens} — {nameOf(rm.winner)} advance</div>}
+                      {rm.aet && !rm.pens && rm.winner && <div className="pens-note">After extra time</div>}
                       <div className="bmeta">
                         {!played && rm.kickoff && <><Clock size={9} />{fmtLocal(rm.kickoff)}{rm.timeTBC && " ※"}</>}
                         {rm.venue && <><MapPin size={9} />{rm.venue.split(",")[0]}{rm.tbc && " ※"}</>}
@@ -1208,6 +1278,8 @@ function Bracket({ bracket, predictions, setPredictions, favorite, selected, set
 }
 
 function StatsPanel() {
+  const { live } = useTour();
+  const { scorers, assists, cleanSheets } = live;
   const [tab, setTab] = useState("goals");
   const [sort, setSort] = useState({ key: null, dir: -1 });
   const tabs = [
@@ -1230,7 +1302,7 @@ function StatsPanel() {
       {label}{sort.key === key ? (sort.dir === -1 ? " ↓" : " ↑") : ""}
     </th>
   );
-  const chartData = SCORERS.slice(0, 8).map((s) => ({ name: s.player.split(" ").slice(-1)[0], goals: s.goals }));
+  const chartData = scorers.slice(0, 8).map((s) => ({ name: s.player.split(" ").slice(-1)[0], goals: s.goals }));
   return (
     <>
       <div className="stats-tabs">
@@ -1258,7 +1330,7 @@ function StatsPanel() {
           <table className="stat-table">
             <thead><tr><th>#</th>{th("Player", "player")}{th("Team", "team")}{th("Goals", "goals")}</tr></thead>
             <tbody>
-              {sortRows(SCORERS, "goals").map((s, i) => (
+              {sortRows(scorers, "goals").map((s, i) => (
                 <tr key={s.player}>
                   <td style={{ color: "var(--muted2)", fontWeight: 700 }}>{i + 1}</td>
                   <td>{s.player}{s.unverified && " ※"}</td>
@@ -1268,7 +1340,7 @@ function StatsPanel() {
               ))}
             </tbody>
           </table>
-          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> ※ Sources disagree on Kane's tally (3–5 goals across outlets on {DATA_AS_OF}); the lower verified figure is shown. Ties are ordered by assists per FIFA's Golden Boot rules.</div>
+          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> {live.scorersNote} Data as of {live.asOf}.</div>
         </>
       )}
 
@@ -1277,7 +1349,7 @@ function StatsPanel() {
           <table className="stat-table">
             <thead><tr><th>#</th>{th("Player", "player")}{th("Team", "team")}{th("Assists", "assists")}</tr></thead>
             <tbody>
-              {sortRows(ASSISTS, "assists").map((s, i) => (
+              {sortRows(assists, "assists").map((s, i) => (
                 <tr key={s.player}>
                   <td style={{ color: "var(--muted2)", fontWeight: 700 }}>{i + 1}</td>
                   <td>{s.player}{s.unverified && " ※"}</td>
@@ -1296,7 +1368,7 @@ function StatsPanel() {
           <table className="stat-table">
             <thead><tr><th>#</th>{th("Goalkeeper", "player")}{th("Team", "team")}{th("Clean sheets", "cs")}</tr></thead>
             <tbody>
-              {sortRows(CLEAN_SHEETS, "cs").map((s, i) => (
+              {sortRows(cleanSheets, "cs").map((s, i) => (
                 <tr key={s.player}>
                   <td style={{ color: "var(--muted2)", fontWeight: 700 }}>{i + 1}</td>
                   <td>{s.player}<div style={{ fontSize: 12, color: "var(--muted)" }}>{s.note}</div></td>
@@ -1306,7 +1378,7 @@ function StatsPanel() {
               ))}
             </tbody>
           </table>
-          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Mexico and Spain are the only sides yet to concede. Curaçao's Eloy Room set a modern World Cup record with 15 saves in one match vs Ecuador.</div>
+          <div className="note-line"><Info size={13} style={{ flex: "none", marginTop: 2 }} /> Shutout counts include group stage and knockout rounds. Full goalkeeping stats: FIFA.com. Data as of {live.asOf}.</div>
         </>
       )}
 
@@ -1315,7 +1387,7 @@ function StatsPanel() {
           <AlertTriangle size={22} style={{ color: "var(--gold)", marginBottom: 8 }} />
           <div>
             {tab === "cards" ? "Disciplinary" : "Possession"} leaders weren't verifiable from live sources when this dashboard
-            was compiled ({DATA_AS_OF}), and we don't show unverified numbers.
+            was last updated ({live.asOf}), and we don't show unverified numbers.
           </div>
           <div style={{ marginTop: 6 }}>
             Live figures: <b style={{ color: "var(--text)" }}>fifa.com → Tournament Statistics</b>
@@ -1350,17 +1422,18 @@ export default function App() {
     });
   }, []);
 
-  const bracket = useBracket(predictions);
+  const { live, lastSync } = useLiveData();
+  const tour = useMemo(() => buildTournament(live), [live]);
+  const bracket = useBracket(tour.byId, predictions);
 
   const upcoming = useMemo(() => {
     const now = Date.now();
-    return ALL_KO
+    return tour.merged
       .filter((m) => !m.winner && m.kickoff && new Date(m.kickoff).getTime() > now - 3 * 3600000)
       .map((m) => ({ ...bracket[m.id] }))
-      .filter((m) => true)
       .sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff))
       .slice(0, 8);
-  }, [bracket]);
+  }, [tour, bracket]);
 
   const nextMatch = upcoming.find((m) => m.home && m.away && new Date(m.kickoff) > new Date()) || upcoming[0];
 
@@ -1376,6 +1449,7 @@ export default function App() {
   }, []);
 
   return (
+    <TourCtx.Provider value={tour}>
     <div className="app">
       <style>{CSS}</style>
 
@@ -1386,7 +1460,13 @@ export default function App() {
             <div className="hero-eyebrow"><Trophy size={15} /> FIFA World Cup 26</div>
             <h1>World Cup <span className="grad">2026</span></h1>
             <div className="hero-hosts">🇨🇦 Canada · 🇲🇽 Mexico · 🇺🇸 United States — June 11 → July 19</div>
-            <div className="stage-pill"><span className="dot" /> Round of 32 · knockout stage in progress</div>
+            <div className="stage-pill"><span className="dot" /> {live.stage}</div>
+            <div className="sync-pill">
+              <RefreshCw size={11} className={lastSync ? "spin-slow" : ""} />
+              {lastSync
+                ? <>Live · refreshes every 5s · updated {lastSync.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" })}</>
+                : "Connecting to live data…"}
+            </div>
           </div>
           {nextMatch && (
             <Countdown
@@ -1400,7 +1480,7 @@ export default function App() {
         <div className="hero-scorers">
           <h3><Flame size={14} /> Golden Boot race</h3>
           <div className="scorer-row">
-            {SCORERS.slice(0, 5).map((s, i) => (
+            {live.scorers.slice(0, 5).map((s, i) => (
               <div className="scorer-card stagger" style={{ animationDelay: `${0.15 + i * 0.08}s` }} key={s.player}>
                 <div className="rank">#{i + 1}</div>
                 <div className="sc-name">{s.player}</div>
@@ -1474,10 +1554,11 @@ export default function App() {
       {preview && <PreviewModal match={preview} onClose={() => setPreview(null)} />}
 
       <footer className="foot">
-        Data compiled {DATA_AS_OF} from NBC Sports, CBS Sports, FOX Sports, Sky Sports and FIFA.com coverage of the
-        knockout stage. Scores and standings reflect matches completed before compilation; items marked ※ could not be
-        fully verified across sources. This is a fan dashboard — not affiliated with FIFA.
+        Results and stats stream from <code>live.json</code> (auto-refreshed every 5 seconds), last compiled {live.asOf} from
+        NBC Sports, CBS Sports, FOX Sports, Sky Sports, ESPN and FIFA.com coverage. Items marked ※ could not be fully
+        verified across sources. This is a fan dashboard — not affiliated with FIFA.
       </footer>
     </div>
+    </TourCtx.Provider>
   );
 }
