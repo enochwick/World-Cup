@@ -1,61 +1,318 @@
 {
-  "asOf": "July 6, 2026",
+  "asOf": "July 7, 2026",
   "stage": "Round of 16 · knockout stage in progress",
   "results": {
-    "m73": { "hs": 0, "as": 1, "winner": "CAN" },
-    "m74": { "hs": 2, "as": 1, "winner": "BRA" },
-    "m75": { "hs": 2, "as": 0, "winner": "MEX" },
-    "m76": { "hs": 2, "as": 1, "winner": "ENG" },
-    "m77": { "hs": 1, "as": 2, "winner": "NOR" },
-    "m78": { "hs": 3, "as": 2, "winner": "BEL", "aet": true },
-    "m79": { "hs": 1, "as": 1, "pens": "3–4", "winner": "PAR" },
-    "m80": { "hs": 1, "as": 1, "pens": "2–3", "winner": "MAR" },
-    "m81": { "hs": 3, "as": 0, "winner": "FRA" },
-    "m82": { "hs": 2, "as": 0, "winner": "USA" },
-    "m83": { "hs": 3, "as": 0, "winner": "ESP" },
-    "m84": { "hs": 2, "as": 1, "winner": "POR" },
-    "m85": { "hs": 2, "as": 0, "winner": "SUI" },
-    "m86": { "hs": 1, "as": 1, "pens": "2–4", "winner": "EGY" },
-    "m87": { "hs": 3, "as": 2, "winner": "ARG", "aet": true },
-    "m88": { "hs": 1, "as": 0, "winner": "COL" },
-    "r16a": { "hs": 0, "as": 3, "winner": "MAR" },
-    "r16b": { "hs": 0, "as": 1, "winner": "FRA" },
-    "r16c": { "hs": 1, "as": 2, "winner": "NOR" },
-    "r16d": { "hs": 2, "as": 3, "winner": "ENG" }
+    "m73": {
+      "hs": 0,
+      "as": 1,
+      "winner": "CAN"
+    },
+    "m74": {
+      "hs": 2,
+      "as": 1,
+      "winner": "BRA"
+    },
+    "m75": {
+      "hs": 2,
+      "as": 0,
+      "winner": "MEX"
+    },
+    "m76": {
+      "hs": 2,
+      "as": 1,
+      "winner": "ENG"
+    },
+    "m77": {
+      "hs": 1,
+      "as": 2,
+      "winner": "NOR"
+    },
+    "m78": {
+      "hs": 3,
+      "as": 2,
+      "winner": "BEL",
+      "aet": true
+    },
+    "m79": {
+      "hs": 1,
+      "as": 1,
+      "pens": "3–4",
+      "winner": "PAR"
+    },
+    "m80": {
+      "hs": 1,
+      "as": 1,
+      "pens": "2–3",
+      "winner": "MAR"
+    },
+    "m81": {
+      "hs": 3,
+      "as": 0,
+      "winner": "FRA"
+    },
+    "m82": {
+      "hs": 2,
+      "as": 0,
+      "winner": "USA"
+    },
+    "m83": {
+      "hs": 3,
+      "as": 0,
+      "winner": "ESP"
+    },
+    "m84": {
+      "hs": 2,
+      "as": 1,
+      "winner": "POR"
+    },
+    "m85": {
+      "hs": 2,
+      "as": 0,
+      "winner": "SUI"
+    },
+    "m86": {
+      "hs": 1,
+      "as": 1,
+      "pens": "2–4",
+      "winner": "EGY"
+    },
+    "m87": {
+      "hs": 3,
+      "as": 2,
+      "winner": "ARG",
+      "aet": true
+    },
+    "m88": {
+      "hs": 1,
+      "as": 0,
+      "winner": "COL"
+    },
+    "r16a": {
+      "hs": 0,
+      "as": 3,
+      "winner": "MAR"
+    },
+    "r16b": {
+      "hs": 0,
+      "as": 1,
+      "winner": "FRA"
+    },
+    "r16c": {
+      "hs": 1,
+      "as": 2,
+      "winner": "NOR"
+    },
+    "r16d": {
+      "hs": 2,
+      "as": 3,
+      "winner": "ENG"
+    },
+    "r16e": {
+      "hs": 0,
+      "as": 1,
+      "winner": "ESP"
+    },
+    "r16f": {
+      "hs": 1,
+      "as": 4,
+      "winner": "BEL"
+    },
+    "r16g": {
+      "hs": 3,
+      "as": 2,
+      "winner": "ARG"
+    }
   },
   "scorers": [
-    { "player": "Kylian Mbappé", "team": "FRA", "goals": 7 },
-    { "player": "Lionel Messi", "team": "ARG", "goals": 7 },
-    { "player": "Erling Haaland", "team": "NOR", "goals": 7 },
-    { "player": "Harry Kane", "team": "ENG", "goals": 6 },
-    { "player": "Mikel Oyarzabal", "team": "ESP", "goals": 4 },
-    { "player": "Ousmane Dembélé", "team": "FRA", "goals": 4 },
-    { "player": "Vinícius Júnior", "team": "BRA", "goals": 4 },
-    { "player": "Jonathan David", "team": "CAN", "goals": 3 },
-    { "player": "Deniz Undav", "team": "GER", "goals": 3 },
-    { "player": "Kai Havertz", "team": "GER", "goals": 3 },
-    { "player": "Matheus Cunha", "team": "BRA", "goals": 3 },
-    { "player": "Ismaïla Sarr", "team": "SEN", "goals": 3 },
-    { "player": "Johan Manzambi", "team": "SUI", "goals": 3 },
-    { "player": "Cody Gakpo", "team": "NED", "goals": 3 },
-    { "player": "Brian Brobbey", "team": "NED", "goals": 3 },
-    { "player": "Ismael Saibari", "team": "MAR", "goals": 3 },
-    { "player": "Yoane Wissa", "team": "COD", "goals": 3 }
+    {
+      "player": "Lionel Messi",
+      "team": "ARG",
+      "goals": 8
+    },
+    {
+      "player": "Erling Haaland",
+      "team": "NOR",
+      "goals": 7
+    },
+    {
+      "player": "Kylian Mbappé",
+      "team": "FRA",
+      "goals": 7
+    },
+    {
+      "player": "Harry Kane",
+      "team": "ENG",
+      "goals": 6
+    },
+    {
+      "player": "Ismaïla Sarr",
+      "team": "SEN",
+      "goals": 4
+    },
+    {
+      "player": "Jude Bellingham",
+      "team": "ENG",
+      "goals": 4
+    },
+    {
+      "player": "Julián Quiñones",
+      "team": "MEX",
+      "goals": 4
+    },
+    {
+      "player": "Mikel Oyarzabal",
+      "team": "ESP",
+      "goals": 4
+    },
+    {
+      "player": "Ousmane Dembélé",
+      "team": "FRA",
+      "goals": 4
+    },
+    {
+      "player": "Vinícius Júnior",
+      "team": "BRA",
+      "goals": 4
+    },
+    {
+      "player": "Brian Brobbey",
+      "team": "NED",
+      "goals": 3
+    },
+    {
+      "player": "Cody Gakpo",
+      "team": "NED",
+      "goals": 3
+    },
+    {
+      "player": "Cristiano Ronaldo",
+      "team": "POR",
+      "goals": 3
+    },
+    {
+      "player": "Deniz Undav",
+      "team": "GER",
+      "goals": 3
+    },
+    {
+      "player": "Elijah Just",
+      "team": "NZL",
+      "goals": 3
+    },
+    {
+      "player": "Folarin Balogun",
+      "team": "USA",
+      "goals": 3
+    },
+    {
+      "player": "Ismael Saibari",
+      "team": "MAR",
+      "goals": 3
+    },
+    {
+      "player": "Johan Manzambi",
+      "team": "SUI",
+      "goals": 3
+    },
+    {
+      "player": "Jonathan David",
+      "team": "CAN",
+      "goals": 3
+    },
+    {
+      "player": "Kai Havertz",
+      "team": "GER",
+      "goals": 3
+    },
+    {
+      "player": "Matheus Cunha",
+      "team": "BRA",
+      "goals": 3
+    },
+    {
+      "player": "Raúl Jiménez",
+      "team": "MEX",
+      "goals": 3
+    },
+    {
+      "player": "Romelu Lukaku",
+      "team": "BEL",
+      "goals": 3
+    },
+    {
+      "player": "Yoane Wissa",
+      "team": "COD",
+      "goals": 3
+    }
   ],
-  "scorersNote": "Mbappé, Messi and Haaland are level on 7 — Mbappé leads the Golden Boot on the assists tiebreaker. Goal counts below 4 may lag live play.",
+  "scorersNote": "Messi leads the Golden Boot outright on 8, one clear of Mbappé and Haaland on 7. Ties are ordered by assists per FIFA's rules.",
   "assists": [
-    { "player": "Michael Olise", "team": "FRA", "assists": 5, "unverified": true },
-    { "player": "Bruno Guimarães", "team": "BRA", "assists": 4, "unverified": true }
+    {
+      "player": "Michael Olise",
+      "team": "FRA",
+      "assists": 5
+    },
+    {
+      "player": "Brahim Díaz",
+      "team": "MAR",
+      "assists": 4
+    },
+    {
+      "player": "Bruno Guimarães",
+      "team": "BRA",
+      "assists": 4
+    },
+    {
+      "player": "Roberto Alvarado",
+      "team": "MEX",
+      "assists": 3
+    },
+    {
+      "player": "Florian Wirtz",
+      "team": "GER",
+      "assists": 3
+    },
+    {
+      "player": "Alexander Isak",
+      "team": "SWE",
+      "assists": 3
+    },
+    {
+      "player": "Martin Ødegaard",
+      "team": "NOR",
+      "assists": 3
+    },
+    {
+      "player": "Bukayo Saka",
+      "team": "ENG",
+      "assists": 3
+    },
+    {
+      "player": "Andreas Schjelderup",
+      "team": "NOR",
+      "assists": 3
+    }
   ],
   "cleanSheets": [
-    { "player": "Unai Simón", "team": "ESP", "cs": 4, "note": "Spain are yet to concede at this World Cup" },
-    { "player": "Raúl Rangel", "team": "MEX", "cs": 4, "note": "Eliminated by England in the round of 16" }
+    {
+      "player": "Unai Simón",
+      "team": "ESP",
+      "cs": 5,
+      "note": "Spain are yet to concede at this World Cup"
+    },
+    {
+      "player": "Raúl Rangel",
+      "team": "MEX",
+      "cs": 4,
+      "note": "Eliminated by England in the round of 16"
+    }
   ],
   "notes": {
-    "r16e": "Iberian derby for a quarter-final place — Ronaldo's Portugal against a Spain side yet to concede.",
-    "r16f": "USA vs Belgium — a rematch of the 2014 round-of-16 epic, with Belgium appealing Balogun's suspension.",
+    "r16e": "Mikel Merino's goal sent Spain past Ronaldo's Portugal 1-0 — La Roja still yet to concede.",
+    "r16f": "Belgium routed the USA 4-1, Charles De Ketelaere scoring twice.",
     "qf1": "Morocco vs France — a rematch of the 2022 World Cup semi-final.",
     "qf2": "Haaland's Norway, fresh off eliminating Brazil, meet Kane's England.",
-    "m87": "Messi scored as Argentina survived an extra-time scare against debutants Cape Verde."
+    "m87": "Messi scored as Argentina survived an extra-time scare against debutants Cape Verde.",
+    "r16g": "Messi struck once and set up another as Argentina came from 2-0 down to beat Egypt 3-2."
   }
 }

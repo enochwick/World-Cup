@@ -646,6 +646,8 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .st-third .stbar { background: var(--blue); }
 .st-out .stbar { background: rgba(255,75,92,.55); }
 .st-out .tname, .st-out td { color: var(--muted2); }
+.st-out .tflag { opacity: .4; }
+.bteam.loser .tflag { opacity: .45; }
 .dead { opacity: .55; }
 .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 14px 2px 0; font-size: 12px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
@@ -1076,7 +1078,7 @@ function GroupsView({ onTeam, favorite }) {
                       <td>
                         <span className="tcell">
                           <i className="stbar" />
-                          <span>{flagOf(r.t)}</span>
+                          <span className="tflag">{flagOf(r.t)}</span>
                           <span className="tname">{nameOf(r.t)}</span>
                           {favorite === r.t && <Star size={11} fill="currentColor" color="var(--gold)" />}
                         </span>
@@ -1328,7 +1330,7 @@ function ClassicGrid({ bracket, predictions, favorite, selected, mode, clickTeam
                       onClick={() => clickTeam(rm, code)}
                       disabled={!code}
                     >
-                      <span>{code ? flagOf(code) : "·"}</span>
+                      <span className="tflag">{code ? flagOf(code) : "·"}</span>
                       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {code ? nameOf(code) : "TBD"}
                       </span>
