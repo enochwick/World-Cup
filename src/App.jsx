@@ -402,14 +402,14 @@ const nameOf = (c) => TEAMS[c]?.name ?? c;
 
 function fmtLocal(iso, opts = {}) {
   if (!iso) return "TBC";
-  return new Date(iso).toLocaleString(undefined, {
+  return new Date(iso).toLocaleString("en-US", {
     weekday: "short", month: "short", day: "numeric",
-    hour: "numeric", minute: "2-digit", ...opts,
+    hour: "numeric", minute: "2-digit", timeZone: "America/Chicago", ...opts,
   });
 }
 function fmtTime(iso) {
   if (!iso) return "TBC";
-  return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
 }
 
 function groupOf(code) {
@@ -883,7 +883,7 @@ function Countdown({ match, round }) {
         ))}
       </div>
       <div style={{ marginTop: 10, fontSize: 12, color: "var(--muted)" }}>
-        {fmtLocal(target)} · your local time
+        {fmtLocal(target)} · Central Time (CT)
       </div>
     </div>
   );
