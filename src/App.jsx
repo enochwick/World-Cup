@@ -543,7 +543,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent
 .hero-top { display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; align-items: flex-start; }
 .hero-eyebrow { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
 .hero h1 { font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -.02em; line-height: 1.04; margin: 10px 0 8px; }
-.hero h1 .grad { background: linear-gradient(90deg, #ff4b5c, #2de38a 55%, #4d8dff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 .grad { color: inherit; }
 .hero-hosts { color: var(--muted); font-size: 15px; }
 .stage-pill {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
