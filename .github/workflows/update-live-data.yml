@@ -1,0 +1,33 @@
+name: Update live World Cup data
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # hourly (UTC); GitHub may delay a few minutes
+  workflow_dispatch: {}     # lets you run it on demand from the Actions tab
+
+permissions:
+  contents: write           # allow the job to commit & push
+
+concurrency:
+  group: update-live-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Configure git identity
+        run: |
+          git config user.name "worldcup-bot"
+          git config user.email "actions@github.com"
+
+      - name: Fetch ESPN data and update live.json
+        run: python3 scripts/update-live.py
