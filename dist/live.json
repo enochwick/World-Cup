@@ -12,27 +12,6 @@
       "as": 1,
       "winner": "BRA"
     },
-    "m75": {
-      "hs": 2,
-      "as": 0,
-      "winner": "MEX"
-    },
-    "m76": {
-      "hs": 2,
-      "as": 1,
-      "winner": "ENG"
-    },
-    "m77": {
-      "hs": 1,
-      "as": 2,
-      "winner": "NOR"
-    },
-    "m78": {
-      "hs": 3,
-      "as": 2,
-      "winner": "BEL",
-      "aet": true
-    },
     "m79": {
       "hs": 1,
       "as": 1,
@@ -45,10 +24,31 @@
       "pens": "2–3",
       "winner": "MAR"
     },
+    "m77": {
+      "hs": 1,
+      "as": 2,
+      "winner": "NOR"
+    },
     "m81": {
       "hs": 3,
       "as": 0,
       "winner": "FRA"
+    },
+    "m75": {
+      "hs": 2,
+      "as": 0,
+      "winner": "MEX"
+    },
+    "m76": {
+      "hs": 2,
+      "as": 1,
+      "winner": "ENG"
+    },
+    "m78": {
+      "hs": 3,
+      "as": 2,
+      "winner": "BEL",
+      "aet": true
     },
     "m82": {
       "hs": 2,
@@ -130,19 +130,24 @@
       "goals": 8
     },
     {
-      "player": "Erling Haaland",
-      "team": "NOR",
+      "player": "Kylian Mbappé",
+      "team": "FRA",
       "goals": 7
     },
     {
-      "player": "Kylian Mbappé",
-      "team": "FRA",
+      "player": "Erling Haaland",
+      "team": "NOR",
       "goals": 7
     },
     {
       "player": "Harry Kane",
       "team": "ENG",
       "goals": 6
+    },
+    {
+      "player": "Ousmane Dembélé",
+      "team": "FRA",
+      "goals": 4
     },
     {
       "player": "Ismaïla Sarr",
@@ -165,18 +170,18 @@
       "goals": 4
     },
     {
-      "player": "Ousmane Dembélé",
-      "team": "FRA",
-      "goals": 4
-    },
-    {
       "player": "Vinícius Júnior",
       "team": "BRA",
       "goals": 4
     },
     {
-      "player": "Brian Brobbey",
-      "team": "NED",
+      "player": "Deniz Undav",
+      "team": "GER",
+      "goals": 3
+    },
+    {
+      "player": "Johan Manzambi",
+      "team": "SUI",
       "goals": 3
     },
     {
@@ -185,13 +190,18 @@
       "goals": 3
     },
     {
-      "player": "Cristiano Ronaldo",
-      "team": "POR",
+      "player": "Romelu Lukaku",
+      "team": "BEL",
       "goals": 3
     },
     {
-      "player": "Deniz Undav",
-      "team": "GER",
+      "player": "Brian Brobbey",
+      "team": "NED",
+      "goals": 3
+    },
+    {
+      "player": "Cristiano Ronaldo",
+      "team": "POR",
       "goals": 3
     },
     {
@@ -207,11 +217,6 @@
     {
       "player": "Ismael Saibari",
       "team": "MAR",
-      "goals": 3
-    },
-    {
-      "player": "Johan Manzambi",
-      "team": "SUI",
       "goals": 3
     },
     {
@@ -235,17 +240,12 @@
       "goals": 3
     },
     {
-      "player": "Romelu Lukaku",
-      "team": "BEL",
-      "goals": 3
-    },
-    {
       "player": "Yoane Wissa",
       "team": "COD",
       "goals": 3
     }
   ],
-  "scorersNote": "Messi leads the Golden Boot outright on 8, one clear of Mbappé and Haaland on 7. Ties are ordered by assists per FIFA's rules.",
+  "scorersNote": "Messi leads the Golden Boot outright on 8, clear of Mbappé, Haaland on 7. Ties are ordered by assists.",
   "assists": [
     {
       "player": "Michael Olise",
@@ -263,22 +263,12 @@
       "assists": 4
     },
     {
-      "player": "Roberto Alvarado",
-      "team": "MEX",
-      "assists": 3
-    },
-    {
-      "player": "Florian Wirtz",
-      "team": "GER",
-      "assists": 3
-    },
-    {
       "player": "Alexander Isak",
       "team": "SWE",
       "assists": 3
     },
     {
-      "player": "Martin Ødegaard",
+      "player": "Andreas Schjelderup",
       "team": "NOR",
       "assists": 3
     },
@@ -288,8 +278,18 @@
       "assists": 3
     },
     {
-      "player": "Andreas Schjelderup",
+      "player": "Florian Wirtz",
+      "team": "GER",
+      "assists": 3
+    },
+    {
+      "player": "Martin Ødegaard",
       "team": "NOR",
+      "assists": 3
+    },
+    {
+      "player": "Roberto Alvarado",
+      "team": "MEX",
       "assists": 3
     }
   ],
