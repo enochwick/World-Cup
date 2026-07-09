@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.worldcup.goalwatch</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>__SCRIPT__</string>
+  </array>
+
+  <!-- Your private ntfy topic (subscribe to the same one in the ntfy app). -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>NTFY_TOPIC</key>
+    <string>worldcup-goals-aebd9103</string>
+    <key>POLL_SECONDS</key>
+    <string>20</string>
+    <key>MAC_ALERTS</key>
+    <string>1</string>
+    <key>PHONE_ALERTS</key>
+    <string>0</string>
+  </dict>
+
+  <!-- Keep it running; relaunch if it ever exits. -->
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>__LOG__</string>
+  <key>StandardErrorPath</key>
+  <string>__LOG__</string>
+</dict>
+</plist>
