@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Build tooling
+.DS_Store
+
+# Goal watcher runtime files (not source)
+scripts/.goal-watch-state.json
+scripts/goal-watch.log
