@@ -1,5 +1,5 @@
 {
-  "asOf": "July 9, 2026",
+  "asOf": "July 10, 2026",
   "stage": "Round of 16 · knockout stage in progress",
   "results": {
     "m73": {
@@ -132,6 +132,11 @@
       "hs": 0,
       "as": 2,
       "winner": "FRA"
+    },
+    "qf3": {
+      "hs": 2,
+      "as": 1,
+      "winner": "ESP"
     }
   },
   "scorers": [
@@ -193,6 +198,11 @@
     {
       "player": "Johan Manzambi",
       "team": "SUI",
+      "goals": 3
+    },
+    {
+      "player": "Charles De Ketelaere",
+      "team": "BEL",
       "goals": 3
     },
     {
