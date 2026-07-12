@@ -1,5 +1,5 @@
 {
-  "asOf": "July 11, 2026",
+  "asOf": "July 12, 2026",
   "stage": "Round of 16 · knockout stage in progress",
   "results": {
     "m73": {
@@ -143,6 +143,12 @@
       "hs": 2,
       "as": 1,
       "winner": "ESP"
+    },
+    "qf4": {
+      "hs": 3,
+      "as": 1,
+      "winner": "ARG",
+      "aet": true
     }
   },
   "scorers": [
