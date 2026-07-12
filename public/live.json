@@ -1,5 +1,5 @@
 {
-  "asOf": "July 10, 2026",
+  "asOf": "July 11, 2026",
   "stage": "Round of 16 · knockout stage in progress",
   "results": {
     "m73": {
@@ -133,6 +133,12 @@
       "as": 2,
       "winner": "FRA"
     },
+    "qf2": {
+      "hs": 1,
+      "as": 2,
+      "winner": "ENG",
+      "aet": true
+    },
     "qf3": {
       "hs": 2,
       "as": 1,
@@ -161,6 +167,11 @@
       "goals": 6
     },
     {
+      "player": "Jude Bellingham",
+      "team": "ENG",
+      "goals": 6
+    },
+    {
       "player": "Ousmane Dembélé",
       "team": "FRA",
       "goals": 5
@@ -168,11 +179,6 @@
     {
       "player": "Ismaïla Sarr",
       "team": "SEN",
-      "goals": 4
-    },
-    {
-      "player": "Jude Bellingham",
-      "team": "ENG",
       "goals": 4
     },
     {
@@ -284,6 +290,11 @@
       "assists": 4
     },
     {
+      "player": "Martin Ødegaard",
+      "team": "NOR",
+      "assists": 4
+    },
+    {
       "player": "Alexander Isak",
       "team": "SWE",
       "assists": 3
@@ -291,6 +302,11 @@
     {
       "player": "Andreas Schjelderup",
       "team": "NOR",
+      "assists": 3
+    },
+    {
+      "player": "Anthony Gordon",
+      "team": "ENG",
       "assists": 3
     },
     {
@@ -306,11 +322,6 @@
     {
       "player": "Kylian Mbappé",
       "team": "FRA",
-      "assists": 3
-    },
-    {
-      "player": "Martin Ødegaard",
-      "team": "NOR",
       "assists": 3
     },
     {
