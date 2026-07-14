@@ -1,5 +1,5 @@
 {
-  "asOf": "July 12, 2026",
+  "asOf": "July 14, 2026",
   "stage": "Semifinals · France vs England and Spain vs Argentina",
   "results": {
     "m73": {
@@ -149,6 +149,11 @@
       "as": 1,
       "winner": "ARG",
       "aet": true
+    },
+    "sf1": {
+      "hs": 0,
+      "as": 2,
+      "winner": "ESP"
     }
   },
   "scorers": [
@@ -183,6 +188,11 @@
       "goals": 5
     },
     {
+      "player": "Mikel Oyarzabal",
+      "team": "ESP",
+      "goals": 5
+    },
+    {
       "player": "Ismaïla Sarr",
       "team": "SEN",
       "goals": 4
@@ -190,11 +200,6 @@
     {
       "player": "Julián Quiñones",
       "team": "MEX",
-      "goals": 4
-    },
-    {
-      "player": "Mikel Oyarzabal",
-      "team": "ESP",
       "goals": 4
     },
     {
@@ -340,7 +345,7 @@
     {
       "player": "Unai Simón",
       "team": "ESP",
-      "cs": 5,
+      "cs": 6,
       "note": "Spain are yet to concede at this World Cup"
     },
     {
