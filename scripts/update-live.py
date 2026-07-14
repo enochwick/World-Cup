@@ -32,7 +32,7 @@ KO_FEEDS = {  # later rounds: home = winner of feeds[0], away = winner of feeds[
     "r16d": ("m75", "m76"), "r16e": ("m84", "m83"), "r16f": ("m82", "m78"),
     "r16g": ("m87", "m86"), "r16h": ("m85", "m88"),
     "qf1": ("r16a", "r16b"), "qf2": ("r16c", "r16d"), "qf3": ("r16e", "r16f"),
-    "qf4": ("r16g", "r16h"), "sf1": ("qf1", "qf2"), "sf2": ("qf3", "qf4"),
+    "qf4": ("r16g", "r16h"), "sf1": ("qf1", "qf3"), "sf2": ("qf2", "qf4"),
     "final": ("sf1", "sf2"),
 }
 
