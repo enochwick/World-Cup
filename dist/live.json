@@ -1,5 +1,5 @@
 {
-  "asOf": "July 14, 2026",
+  "asOf": "July 15, 2026",
   "stage": "Semifinals · France vs England and Spain vs Argentina",
   "results": {
     "m73": {
@@ -154,17 +154,22 @@
       "hs": 0,
       "as": 2,
       "winner": "ESP"
+    },
+    "sf2": {
+      "hs": 1,
+      "as": 2,
+      "winner": "ARG"
     }
   },
   "scorers": [
     {
-      "player": "Kylian Mbappé",
-      "team": "FRA",
+      "player": "Lionel Messi",
+      "team": "ARG",
       "goals": 8
     },
     {
-      "player": "Lionel Messi",
-      "team": "ARG",
+      "player": "Kylian Mbappé",
+      "team": "FRA",
       "goals": 8
     },
     {
@@ -225,6 +230,11 @@
     {
       "player": "Cody Gakpo",
       "team": "NED",
+      "goals": 3
+    },
+    {
+      "player": "Lautaro Martínez",
+      "team": "ARG",
       "goals": 3
     },
     {
@@ -298,6 +308,11 @@
     {
       "player": "Bruno Guimarães",
       "team": "BRA",
+      "assists": 4
+    },
+    {
+      "player": "Lionel Messi",
+      "team": "ARG",
       "assists": 4
     },
     {
