@@ -1,5 +1,5 @@
 {
-  "asOf": "July 15, 2026",
+  "asOf": "July 18, 2026",
   "stage": "Semifinals · France vs England and Spain vs Argentina",
   "results": {
     "m73": {
@@ -163,14 +163,19 @@
   },
   "scorers": [
     {
+      "player": "Kylian Mbappé",
+      "team": "FRA",
+      "goals": 10
+    },
+    {
       "player": "Lionel Messi",
       "team": "ARG",
       "goals": 8
     },
     {
-      "player": "Kylian Mbappé",
-      "team": "FRA",
-      "goals": 8
+      "player": "Jude Bellingham",
+      "team": "ENG",
+      "goals": 7
     },
     {
       "player": "Erling Haaland",
@@ -178,19 +183,14 @@
       "goals": 7
     },
     {
+      "player": "Ousmane Dembélé",
+      "team": "FRA",
+      "goals": 6
+    },
+    {
       "player": "Harry Kane",
       "team": "ENG",
       "goals": 6
-    },
-    {
-      "player": "Jude Bellingham",
-      "team": "ENG",
-      "goals": 6
-    },
-    {
-      "player": "Ousmane Dembélé",
-      "team": "FRA",
-      "goals": 5
     },
     {
       "player": "Mikel Oyarzabal",
@@ -213,6 +213,11 @@
       "goals": 4
     },
     {
+      "player": "Bukayo Saka",
+      "team": "ENG",
+      "goals": 3
+    },
+    {
       "player": "Deniz Undav",
       "team": "GER",
       "goals": 3
@@ -220,6 +225,11 @@
     {
       "player": "Johan Manzambi",
       "team": "SUI",
+      "goals": 3
+    },
+    {
+      "player": "Bradley Barcola",
+      "team": "FRA",
       "goals": 3
     },
     {
@@ -293,12 +303,12 @@
       "goals": 3
     }
   ],
-  "scorersNote": "Goal and assist tallies are compiled live from ESPN. Ties are ordered by assists.",
+  "scorersNote": "Mbappé leads the Golden Boot outright on 10, clear of Messi on 8. Ties are ordered by assists.",
   "assists": [
     {
       "player": "Michael Olise",
       "team": "FRA",
-      "assists": 5
+      "assists": 7
     },
     {
       "player": "Brahim Díaz",
@@ -308,6 +318,11 @@
     {
       "player": "Bruno Guimarães",
       "team": "BRA",
+      "assists": 4
+    },
+    {
+      "player": "Kylian Mbappé",
+      "team": "FRA",
       "assists": 4
     },
     {
@@ -343,11 +358,6 @@
     {
       "player": "Florian Wirtz",
       "team": "GER",
-      "assists": 3
-    },
-    {
-      "player": "Kylian Mbappé",
-      "team": "FRA",
       "assists": 3
     },
     {
