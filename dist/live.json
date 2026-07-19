@@ -1,5 +1,5 @@
 {
-  "asOf": "July 18, 2026",
+  "asOf": "July 19, 2026",
   "stage": "Semifinals · France vs England and Spain vs Argentina",
   "results": {
     "m73": {
@@ -159,6 +159,12 @@
       "hs": 1,
       "as": 2,
       "winner": "ARG"
+    },
+    "final": {
+      "hs": 1,
+      "as": 0,
+      "winner": "ESP",
+      "aet": true
     }
   },
   "scorers": [
@@ -370,7 +376,7 @@
     {
       "player": "Unai Simón",
       "team": "ESP",
-      "cs": 6,
+      "cs": 7,
       "note": "Spain are yet to concede at this World Cup"
     },
     {
